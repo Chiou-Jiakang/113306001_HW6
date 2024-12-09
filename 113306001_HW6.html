@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>113306001_HW6_1A2B</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>113306001_HW6_1A2B</h1>
+    <div class="game-container">
+        <input type="text" id="guess-input" placeholder="請輸入 4 個不重複的數字">
+        <button onclick="submitGuess()">猜!</button>
+        <div id="results">
+            <h2>遊戲紀錄：</h2>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+<script>
+    let secretNumber = generateSecretNumber();
+let attempts = 0;
+
+function generateSecretNumber() {
+    const digits = Array.from({ length: 10 }, (_, i) => i.toString());
+    let number = [];
+    while (number.length < 4) {
+        const randomIndex = Math.floor(Math.random() * digits.length);
+        number.push(digits.splice(randomIndex, 1)[0]);
+    }
+    return number.join('');
+}
+
+function submitGuess() {
+    const inputField = document.getElementById('guess-input');
+    const guess = inputField.value.trim();
+    inputField.value = '';
+
+    if (!isValidGuess(guess)) {
+        alert('請輸入 4 個不重複的數字！');
+        return;
+    }
+
+    attempts++;
+    const result = checkGuess(guess);
+    displayResult(attempts, guess, result);
+
+    if (result === '4A0B') {
+        alert(`恭喜答對！共嘗試了 ${attempts} 次。`);
+        resetGame();
+    }
+}
+
+function isValidGuess(guess) {
+    return /^\d{4}$/.test(guess) && new Set(guess).size === 4;
+}
+
+function checkGuess(guess) {
+    let aCount = 0;
+    let bCount = 0;
+    const secretArray = secretNumber.split('');
+    const guessArray = guess.split('');
+
+    for (let i = 0; i < 4; i++) {
+        if (guessArray[i] === secretArray[i]) {
+            aCount++;
+            secretArray[i] = null;
+            guessArray[i] = null;
+        }
+    }
+
+    for (let i = 0; i < 4; i++) {
+        if (guessArray[i] !== null && secretArray.includes(guessArray[i])) {
+            bCount++;
+            const index = secretArray.indexOf(guessArray[i]);
+            secretArray[index] = null;
+        }
+    }
+
+    return `${aCount}A${bCount}B`;
+}
+
+function displayResult(attempt, guess, result) {
+    const resultsDiv = document.getElementById('results');
+    const resultEntry = document.createElement('div');
+    resultEntry.textContent = `第${attempt}次: ${guess} → ${result}`;
+    resultsDiv.appendChild(resultEntry);
+}
+
+function resetGame() {
+    secretNumber = generateSecretNumber();
+    attempts = 0;
+    document.getElementById('results').innerHTML = '<h2>遊戲紀錄：</h2>';
+}
+</script>
+</html>
